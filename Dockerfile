@@ -4,9 +4,15 @@
 # ──────────────────────────────────────────────────────────────────────────────
 FROM rocm/pytorch:rocm7.2_ubuntu24.04_py3.13_pytorch_release_2.10.0 AS builder
 
+# Allow the target GPU architecture to be overridden at build time:
+#   docker build --build-arg PYTORCH_ROCM_ARCH=gfx1100 ...
+ARG PYTORCH_ROCM_ARCH=gfx1151
+
 # Target AMD Strix Halo / gfx1151 exclusively to keep compile time short and
 # the resulting wheel small.
-ENV PYTORCH_ROCM_ARCH=gfx1151 \
+ENV PYTORCH_ROCM_ARCH=${PYTORCH_ROCM_ARCH} \
+    # PyTorch extension builds check FORCE_CUDA=1 to trigger compilation even
+    # on ROCm/HIP because the two share the same build-extension code path.
     FORCE_CUDA=1 \
     CMAKE_BUILD_PARALLEL_LEVEL=4 \
     PIP_NO_CACHE_DIR=1 \
