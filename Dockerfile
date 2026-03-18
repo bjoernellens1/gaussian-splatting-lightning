@@ -52,13 +52,6 @@ COPY . /build/gaussian-splatting-lightning
 WORKDIR /build/gaussian-splatting-lightning
 RUN pip install --no-build-isolation -e .
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Stage 2 – runtime
-#   Lightweight AMD Strix Halo toolbox image; copy the Python environment and
-#   the installed application from the builder stage.
-# ──────────────────────────────────────────────────────────────────────────────
-FROM kyuz0/amd-strix-halo-toolboxes:rocm-7.2 AS runtime
-
 ENV PYTORCH_ROCM_ARCH=gfx1151 \
     HSA_OVERRIDE_GFX_VERSION=11.5.1 \
     DEBIAN_FRONTEND=noninteractive \
@@ -71,12 +64,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         ffmpeg \
         git \
     && rm -rf /var/lib/apt/lists/*
-
-# Copy the entire conda/Python environment from the builder stage
-COPY --from=builder /opt/conda /opt/conda
-
-# Copy installed application source (editable install keeps the .pth file)
-COPY --from=builder /build/gaussian-splatting-lightning /app/gaussian-splatting-lightning
 
 WORKDIR /app/gaussian-splatting-lightning
 
