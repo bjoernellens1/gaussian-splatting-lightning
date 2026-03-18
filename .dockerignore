@@ -1,0 +1,32 @@
+# Git metadata
+.git
+.gitignore
+.gitmodules
+.github
+
+# Python cache and build artefacts
+**/__pycache__
+**/*.py[cod]
+**/*.egg-info
+*.egg
+dist/
+build/
+
+# IDE / editor files
+.idea
+.vscode
+*.swp
+*.swo
+
+# Training outputs & dataset artefacts (not needed in the image)
+outputs/
+camera_paths/
+renders/
+edited/
+clusters/
+segments/
+notebooks/
+
+# Temporary files
+*.log
+*.tmp
