@@ -29,8 +29,12 @@ COPY utils/ utils/
 
 RUN pip install --upgrade pip setuptools wheel && \
     pip install lightning[pytorch-extra]==2.5.* pytorch-lightning==2.5.* && \
-    pip install -r requirements/common.txt && \
-    pip install -r requirements/gsplat.txt
+    pip install -r requirements.txt && \
+    pip install --no-build-isolation \
+        git+https://github.com/graphdeco-inria/diff-gaussian-rasterization.git@59f5f77e3ddbac3ed9db93ec2cfe99ed6c5d121d && \
+    pip install --no-build-isolation \
+        git+https://github.com/yzslab/simple-knn.git@44f764299fa305faf6ec5ebd99939e0508331503 && \
+    pip install --no-build-isolation -r requirements/gsplat.txt
 
 COPY . /build/gaussian-splatting-lightning
 WORKDIR /build/gaussian-splatting-lightning
