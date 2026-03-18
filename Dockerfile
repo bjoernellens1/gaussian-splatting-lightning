@@ -54,18 +54,33 @@ RUN pip install --no-build-isolation -e .
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Stage 2 – runtime
-#   Lightweight AMD Strix Halo toolbox image; copy the Python environment and
+#   Ubuntu 24.04 base with ROCm 7.2 runtime; copy the Python environment and
 #   the installed application from the builder stage.
 # ──────────────────────────────────────────────────────────────────────────────
-FROM kyuz0/amd-strix-halo-toolboxes:rocm-7.2 AS runtime
+FROM ubuntu:24.04 AS runtime
+
+# Override at build time if needed:
+#   docker build --build-arg ROCM_VERSION=7.2 --build-arg UBUNTU_CODENAME=noble ...
+ARG ROCM_VERSION=7.2
+ARG UBUNTU_CODENAME=noble
 
 ENV PYTORCH_ROCM_ARCH=gfx1151 \
     HSA_OVERRIDE_GFX_VERSION=11.5.1 \
     DEBIAN_FRONTEND=noninteractive \
     PATH="/opt/conda/bin:$PATH"
 
-# Runtime system libraries (OpenGL headless, libGL for cv2, etc.)
+# Install ROCm from AMD's TheRock/official repository and runtime system libraries
 RUN apt-get update && apt-get install -y --no-install-recommends \
+        wget \
+        gnupg \
+        ca-certificates \
+    && wget -qO /tmp/rocm.gpg.key https://repo.radeon.com/rocm/rocm.gpg.key \
+    && install -D -m 644 /tmp/rocm.gpg.key /etc/apt/keyrings/rocm.gpg \
+    && rm /tmp/rocm.gpg.key \
+    && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/${ROCM_VERSION} ${UBUNTU_CODENAME} main" \
+       > /etc/apt/sources.list.d/rocm.list \
+    && apt-get update && apt-get install -y --no-install-recommends \
+        rocm-hip-runtime \
         libgl1 \
         libglib2.0-0 \
         ffmpeg \
